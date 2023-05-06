@@ -1,0 +1,3 @@
+migrate command
+
+go run migrate/migrate.go
