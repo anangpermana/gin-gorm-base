@@ -34,6 +34,9 @@ func init() {
 	UserController = controllers.NewUserController(initializers.DB)
 	UserRouteController = routes.NewRouteUserController(UserController)
 
+	if config.GinMode != "debug" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	server = gin.Default()
 }
 
