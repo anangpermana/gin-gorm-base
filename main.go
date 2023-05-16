@@ -18,6 +18,9 @@ var (
 
 	UserController      controllers.UserController
 	UserRouteController routes.UserRouteController
+
+	PostController      controllers.PostController
+	PostRouteController routes.PostRouteController
 )
 
 func init() {
@@ -34,6 +37,9 @@ func init() {
 	UserController = controllers.NewUserController(initializers.DB)
 	UserRouteController = routes.NewRouteUserController(UserController)
 
+	PostController = controllers.NewPostController(initializers.DB)
+	PostRouteController = routes.NewRoutePostController(PostController)
+
 	if config.GinMode != "debug" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -48,10 +54,14 @@ func main() {
 
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{config.Cors, config.ClientOrigin}
+	corsConfig.AllowHeaders = []string{"*"}
 	corsConfig.AllowCredentials = true
 
 	server.Use(cors.New(corsConfig))
-
+	server.GET("/", func(ctx *gin.Context) {
+		message := "hello world"
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
+	})
 	router := server.Group("/api")
 	router.GET("/healthchecker", func(ctx *gin.Context) {
 		message := "welcome go golang with gorm and postgres"
@@ -61,5 +71,7 @@ func main() {
 	//routelist
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
+	PostRouteController.PostRoute(router)
+
 	log.Fatal(server.Run(":" + config.ServerPort))
 }
