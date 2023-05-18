@@ -19,4 +19,5 @@ logs.txt
 .idea/
 .vscode/
 secret.md
-app.env
+.env
+tmp/
