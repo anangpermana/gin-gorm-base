@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -8,6 +10,7 @@ import (
 
 	"github.com/anangpermana/gin-gorm-base/models"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
@@ -19,12 +22,31 @@ func NewPostController(DB *gorm.DB) PostController {
 	return PostController{DB}
 }
 
+func Simple(verr validator.ValidationErrors) map[string]string {
+	errs := make(map[string]string)
+
+	for _, f := range verr {
+		err := f.ActualTag()
+		if f.Param() != "" {
+			err = fmt.Sprintf("%s=%s", err, f.Param())
+		}
+		errs[f.Field()] = err
+	}
+	return errs
+}
+
 func (pc *PostController) CreatePost(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
 	var payload *models.CreatePostRequest
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+		var verr validator.ValidationErrors
+		if errors.As(err, &verr) {
+			ctx.JSON(http.StatusBadRequest, gin.H{"errors": Simple(verr)})
+			return
+		}
+		// ctx.JSON(http.StatusBadRequest, err.Error())
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "bad request"})
 		return
 	}
 
