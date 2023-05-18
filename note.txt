@@ -1,3 +1,15 @@
 migrate command
 
 go run migrate/migrate.go
+
+##add uuid postgresql
+
+1. login
+psql -U anang nama_db
+2. list available ext
+select * from pg_available_extensions;
+3. install uuid-ossp ext
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+4. cek pake no 2
+5. quit
+\q
