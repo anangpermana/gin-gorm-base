@@ -14,6 +14,7 @@ type Post struct {
 	User      uuid.UUID `gorm:"not null" json:"user,omitempty"`
 	CreatedAt time.Time `gorm:"not null" json:"created_at,omitempty"`
 	UpdatedAt time.Time `gorm:"not null" json:"updated_at,omitempty"`
+	Userdata  User      `gorm:"foreignKey:User"`
 }
 
 type CreatePostRequest struct {

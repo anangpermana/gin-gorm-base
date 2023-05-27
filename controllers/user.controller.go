@@ -32,3 +32,15 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
 }
+
+func (uc *UserController) FindUsers(ctx *gin.Context) {
+	var user []models.User
+	results := uc.DB.Select("id", "name").Preload("Post").Find(&user)
+
+	if results.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": results.Error})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "result": len(user), "data": user})
+}

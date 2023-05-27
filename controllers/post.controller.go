@@ -85,7 +85,7 @@ func (pc *PostController) UpdatePost(ctx *gin.Context) {
 	var updatedPost models.Post
 	result := pc.DB.First(&updatedPost, "id = ?", postId)
 	if result.Error != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No post with that title exists"})
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No post with that id exists"})
 		return
 	}
 	now := time.Now()
@@ -125,7 +125,10 @@ func (pc *PostController) FindPosts(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var posts []models.Post
-	results := pc.DB.Limit(intLimit).Offset(offset).Find(&posts)
+	// results := pc.DB.Limit(intLimit).Offset(offset).Preload("Userdata").Find(&posts)
+	results := pc.DB.Limit(intLimit).Offset(offset).Preload("Userdata", func(db *gorm.DB) *gorm.DB {
+		return db.Select("id", "name", "email", "role", "Photo")
+	}).Find(&posts)
 	if results.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": results.Error})
 		return
@@ -137,12 +140,14 @@ func (pc *PostController) FindPosts(ctx *gin.Context) {
 func (pc *PostController) DeletePost(ctx *gin.Context) {
 	postId := ctx.Param("postId")
 
-	result := pc.DB.Delete(&models.Post{}, "id = ?", postId)
+	result := pc.DB.First(&models.Post{}, "id = ?", postId)
 
 	if result.Error != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No post with that title exists"})
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No post with that id exists"})
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, nil)
+	pc.DB.Delete(&models.Post{}, "id = ?", postId)
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
