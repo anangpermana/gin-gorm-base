@@ -21,6 +21,9 @@ var (
 
 	PostController      controllers.PostController
 	PostRouteController routes.PostRouteController
+
+	MemberController      controllers.MemberController
+	MemberRouteController routes.MemberRouteController
 )
 
 func init() {
@@ -39,6 +42,9 @@ func init() {
 
 	PostController = controllers.NewPostController(initializers.DB)
 	PostRouteController = routes.NewRoutePostController(PostController)
+
+	MemberController = controllers.NewMemberController(initializers.DB)
+	MemberRouteController = routes.NewMemberController(MemberController)
 
 	if config.GinMode != "debug" {
 		gin.SetMode(gin.ReleaseMode)
@@ -72,6 +78,6 @@ func main() {
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
 	PostRouteController.PostRoute(router)
-
+	MemberRouteController.MemberRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
 }
